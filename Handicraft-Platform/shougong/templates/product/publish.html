@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>发布商品</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">商品名称</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="price">价格</label>
+            <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+        </div>
+        <div class="form-group">
+            <label for="stock">库存数量</label>
+            <input type="number" class="form-control" id="stock" name="stock" value="0" required>
+        </div>
+        <div class="form-group">
+            <label for="category">分类</label>
+            <select class="form-control" id="category" name="category" required>
+                <option value="">请选择分类</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">商品描述</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="image">商品图片</label>
+            <input type="file" class="form-control-file" id="image" name="image" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">发布商品</button>
+        <a href="{{ url_for('user.userinfo', tab=2) }}" class="btn btn-secondary">取消</a>
+    </form>
+</div>
+{% endblock %} 

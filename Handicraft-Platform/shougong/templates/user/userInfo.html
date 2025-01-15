@@ -1,0 +1,458 @@
+{% extends 'user/base.html' %}
+
+{% block title %}
+    个人中心
+{% endblock %}
+
+{% block head %}
+    <script src="{{ url_for('static',filename='js/jquery-3.1.1.min.js') }}"></script>
+    <link href="{{ url_for('static',filename='css/userInfo.css') }}" rel="stylesheet" type="text/css"/>
+    <script src="{{ url_for('static',filename='js/userInfo.js') }}"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/cart.css') }}" rel="stylesheet" type="text/css"/>
+    <script src="{{ url_for('static',filename='js/carts.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <div class="span24">
+            <div class="userInfo">
+                <div class="userInfoLeft">
+                    <div class="userHead">
+                        <div class="avatar-container">
+                            <img src="{{ user.img_url }}" alt="用户头像">
+                            <div class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>更换头像</span>
+                            </div>
+                        </div>
+                        <div class="userName">{{ user.username }}</div>
+                        <div class="userStatus">
+                            <span class="badge {% if user.identity == 1 %}badge-admin{% elif user.identity == 2 %}badge-vip{% else %}badge-normal{% endif %}">
+                                {% if user.identity == 1 %}
+                                    管理员
+                                {% elif user.identity == 2 %}
+                                    会员用户
+                                {% else %}
+                                    普通用户
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="userMenu">
+                        <ul>
+                            <li {% if not tab %}class="active"{% endif %}>
+                                <a href="{{ url_for('user.userInfo') }}">
+                                    <i class="fas fa-user"></i>
+                                    个人资料
+                                </a>
+                            </li>
+                            <li {% if tab == '1' %}class="active"{% endif %}>
+                                <a href="{{ url_for('user.userInfo', tab=1) }}">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    我的购物车
+                                </a>
+                            </li>
+                            <li {% if tab == '2' %}class="active"{% endif %}>
+                                <a href="{{ url_for('user.userInfo', tab=2) }}">
+                                    <i class="fas fa-store"></i>
+                                    我的发布
+                                </a>
+                            </li>
+                            <li {% if tab == '3' %}class="active"{% endif %}>
+                                <a href="{{ url_for('user.userInfo', tab=3) }}">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    我的订单
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="userInfoRight">
+                    {% if not tab %}
+                        <div class="userProfile">
+                            <h3>
+                                <i class="fas fa-user-edit"></i>
+                                个人资料
+                            </h3>
+                            <div class="profileInfo">
+                                <table class="my_table">
+                                    <tr>
+                                        <td><span class="msg_left"><i class="fas fa-user"></i> 用户名</span></td>
+                                        <td>
+                                            <input type="text" class="form-control can_change" value="{{ user.username }}" placeholder="请输入用户名">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="msg_left"><i class="fas fa-envelope"></i> 邮箱</span></td>
+                                        <td>
+                                            <input type="text" class="form-control" value="{{ user.email }}" readonly>
+                                        </td>
+                                    </tr>
+                                    <tr class="password">
+                                        <td><span class="msg_left"><i class="fas fa-lock"></i> 密码</span></td>
+                                        <td>
+                                            <button class="btn btn-primary change_password">
+                                                <i class="fas fa-key"></i>
+                                                修改密码
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="msg_left"><i class="fas fa-phone"></i> 手机号</span></td>
+                                        <td>
+                                            <input type="text" class="form-control can_change" value="{{ user.phone }}" placeholder="请输入手机号">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="msg_left"><i class="fas fa-map-marker-alt"></i> 地址</span></td>
+                                        <td>
+                                            <input type="text" class="form-control can_change" value="{{ user.addr }}" placeholder="请输入地址">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <button class="btn btn-primary save_info" data-id="{{ user.id }}">
+                                                <i class="fas fa-save"></i>
+                                                保存修改
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if tab == '1' %}
+                        <div class="cartMain">
+                            <div class="cartMain_hd">
+                                <ul class="order_lists cartTop">
+                                    <li class="list_chk">
+                                        <input type="checkbox" id="all" class="whole_check">
+                                        <label for="all"></label>
+                                        全选
+                                    </li>
+                                    <li class="list_con">商品信息</li>
+                                    <li class="list_info">商品参数</li>
+                                    <li class="list_price">单价</li>
+                                    <li class="list_amount">数量</li>
+                                    <li class="list_sum">金额</li>
+                                    <li class="list_op">操作</li>
+                                </ul>
+                            </div>
+
+                            <div class="cartBox">
+                                <div class="shop_info">
+                                    <div class="all_check">
+                                        <input type="checkbox" id="shop_a" class="shopChoice">
+                                        <label for="shop_a" class="shop"></label>
+                                    </div>
+                                    <div class="shop_name">
+                                        店铺：<a href="">创意手工艺品交易平台</a>
+                                    </div>
+                                </div>
+                                <div class="order_content">
+                                    {% for cart in user.shopcarts %}
+                                        <ul class="order_lists">
+                                            <li class="list_chk">
+                                                <input type="checkbox" id="{{ cart.id }}" class="son_check">
+                                                <label for="{{ cart.id }}"></label>
+                                            </li>
+                                            <li class="list_con">
+                                                <div class="list_img"><a href="{{ url_for('product.detail',id=cart.product.id) }}"><img src="{{ cart.product.head_img }}" alt=""></a></div>
+                                                <div class="list_text"><a href="{{ url_for('product.detail',id=cart.product.id) }}">{{ cart.product.pname }}</a></div>
+                                            </li>
+                                            <li class="list_info">
+                                                <p>规格：默认</p>
+                                                <p>尺寸：默认</p>
+                                            </li>
+                                            <li class="list_price">
+                                                <p class="price">￥{{ cart.product.new_price }}</p>
+                                            </li>
+                                            <li class="list_amount">
+                                                <div class="amount_box">
+                                                    <a href="javascript:;" class="reduce">-</a>
+                                                    <input type="text" value="{{ cart.count }}" class="sum">
+                                                    <a href="javascript:;" class="plus">+</a>
+                                                </div>
+                                            </li>
+                                            <li class="list_sum">
+                                                <p class="sum_price">￥{{ cart.subTotal }}</p>
+                                            </li>
+                                            <li class="list_op">
+                                                <p class="del"><a href="javascript:;" class="delBtn" sp_id="{{ cart.id }}">移除商品</a></p>
+                                            </li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="bar-wrapper">
+                                <div class="bar-right">
+                                    <div class="piece">已选商品<strong class="piece_num">0</strong>件</div>
+                                    <div class="totalMoney">共计: <strong class="total_text">￥0.00</strong></div>
+                                    <div class="calBtn"><a href="javascript:;">结算</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if tab == '2' %}
+                        <div class="cartMain">
+                            <div class="cartMain_hd">
+                                <ul class="order_lists cartTop">
+                                    <li class="list_con" style="width: 30%;">商品信息</li>
+                                    <li class="list_info" style="width: 25%;">商品参数</li>
+                                    <li class="list_price" style="width: 10%;">单价</li>
+                                    <li class="list_amount" style="width: 10%;">库存</li>
+                                    <li class="list_sum" style="width: 10%;">状态</li>
+                                    <li class="list_op" style="width: 15%;">操作</li>
+                                </ul>
+                            </div>
+
+                            <div class="cartBox">
+                                <div class="shop_info">
+                                    <div class="shop_name">
+                                        <i class="fas fa-store"></i>
+                                        我的发布
+                                    </div>
+                                </div>
+                                <div class="order_content">
+                                    {% if products %}
+                                        {% for product in products %}
+                                            <ul class="order_lists" style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee;">
+                                                <li class="list_con" style="width: 30%; display: flex; align-items: center;">
+                                                    <div class="list_img" style="width: 80px; height: 80px; margin-right: 15px;">
+                                                        <a href="{{ url_for('product.detail',id=product.id) }}">
+                                                            <img src="{{ product.head_img }}" alt="{{ product.pname }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                                                        </a>
+                                                    </div>
+                                                    <div class="list_text" style="flex: 1;">
+                                                        <a href="{{ url_for('product.detail',id=product.id) }}" style="color: #333; text-decoration: none; font-weight: 500;">{{ product.pname }}</a>
+                                                    </div>
+                                                </li>
+                                                <li class="list_info" style="width: 25%;">
+                                                    <p style="margin: 0 0 5px 0;">类别：<span style="color: #666;">{{ product.category_name }}</span></p>
+                                                    <p style="margin: 0; color: #999; font-size: 0.9em;">{{ product.pdate.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                                </li>
+                                                <li class="list_price" style="width: 10%;">
+                                                    <p class="price" style="color: #ff6b6b; font-weight: bold;">￥{{ product.new_price }}</p>
+                                                </li>
+                                                <li class="list_amount" style="width: 10%;">
+                                                    <div class="amount_box">
+                                                        <input type="text" value="{{ product.counts }}" class="sum" readonly style="width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px;">
+                                                    </div>
+                                                </li>
+                                                <li class="list_sum" style="width: 10%;">
+                                                    {% if product.is_pass == 0 %}
+                                                        <span class="badge badge-warning" style="font-size: 0.85em; padding: 5px 10px;">待审核</span>
+                                                    {% elif product.is_pass == 2 %}
+                                                        <span class="badge badge-success" style="font-size: 0.85em; padding: 5px 10px;">已上架</span>
+                                                    {% elif product.is_pass == 3 %}
+                                                        <span class="badge badge-danger" style="font-size: 0.85em; padding: 5px 10px;">已下架</span>
+                                                    {% elif product.is_pass == 1 %}
+                                                        <span class="badge badge-secondary" style="font-size: 0.85em; padding: 5px 10px;">审核未通过</span>
+                                                    {% endif %}
+                                                </li>
+                                                <li class="list_op" style="width: 15%;">
+                                                    <div class="btn-group" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                                        <a href="{{ url_for('product.detail', id=product.id) }}" class="btn btn-outline-primary btn-sm" style="font-size: 0.85em;">查看</a>
+                                                        <button class="btn btn-outline-warning btn-sm edit-product" data-id="{{ product.id }}" style="font-size: 0.85em;">编辑</button>
+                                                        {% if product.is_pass == 2 %}
+                                                            <button class="btn btn-outline-danger btn-sm xj_product" data-id="{{ product.id }}" style="font-size: 0.85em;">下架</button>
+                                                        {% elif product.is_pass == 3 or product.is_pass == 1 %}
+                                                            <button class="btn btn-outline-danger btn-sm delete-product" data-id="{{ product.id }}" style="font-size: 0.85em;">删除</button>
+                                                        {% endif %}
+                                                        {% if product.is_pass == 1 %}
+                                                            <button class="btn btn-outline-info btn-sm repeat-check" data-id="{{ product.id }}" style="font-size: 0.85em;">重新申请</button>
+                                                        {% endif %}
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center py-5" style="width: 100%; padding: 50px 0; background: #f8f9fa; border-radius: 8px; margin: 20px 0;">
+                                            <img src="{{ url_for('static', filename='img/null.png') }}" alt="暂无商品" style="width: 120px; margin-bottom: 20px;">
+                                            <h4 style="color: #666; margin-bottom: 15px;">您还没有发布任何商品</h4>
+                                            <p style="color: #999; margin-bottom: 20px;">开始发布您的第一个商品吧！</p>
+                                            <a href="/product/publish" class="btn btn-primary" style="padding: 10px 30px; font-size: 16px;">
+                                                <i class="fas fa-plus"></i> 发布商品
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if tab == '3' %}
+                        <div class="userOrders">
+                            <h3>
+                                <i class="fas fa-clipboard-list"></i>
+                                我的订单
+                            </h3>
+                            <div class="orders-container">
+                                {% if orders %}
+                                    <div class="order_page">
+                                        {% for order in orders %}
+                                            <div class="order_one">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th colspan="5">
+                                                                <span class="order_num">订单号：{{ order.id }}</span>
+                                                                <span class="order_date">{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                                                                {% if order.status == 0 %}
+                                                                    <span class="order_last_time">剩余支付时间：{{ order.last_time }}</span>
+                                                                {% endif %}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for item in order.orderItems %}
+                                                            <tr>
+                                                                <td class="col-md-2">
+                                                                    <img src="{{ item.product.head_img }}" class="img-thumbnail" alt="{{ item.product.pname }}">
+                                                                </td>
+                                                                <td class="col-md-4">
+                                                                    <a href="{{ url_for('product.detail', id=item.product.id) }}">{{ item.product.pname }}</a>
+                                                                </td>
+                                                                <td class="col-md-2">￥{{ "%.2f"|format(item.sub_total / item.count) }}</td>
+                                                                <td class="col-md-2">x{{ item.count }}</td>
+                                                                <td class="col-md-2">￥{{ "%.2f"|format(item.sub_total) }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="5" class="text-right">
+                                                                <span class="order-status">
+                                                                    {% if order.status == 0 %}
+                                                                        <span class="badge badge-warning">待付款</span>
+                                                                    {% elif order.status == 1 %}
+                                                                        <span class="badge badge-info">待发货</span>
+                                                                    {% elif order.status == 2 %}
+                                                                        <span class="badge badge-primary">待收货</span>
+                                                                    {% elif order.status == 3 %}
+                                                                        <span class="badge badge-success">已完成</span>
+                                                                    {% elif order.status == 4 %}
+                                                                        <span class="badge badge-secondary">已取消</span>
+                                                                    {% endif %}
+                                                                </span>
+                                                                <span class="order-total">
+                                                                    共{{ order.total_count }}件商品 总计：￥{{ order.total_amount }}
+                                                                </span>
+                                                                <div class="order-actions">
+                                                                    {% if order.status == 0 %}
+                                                                        <button class="btn btn-primary btn-sm pay-order" data-id="{{ order.id }}">付款</button>
+                                                                        <button class="btn btn-danger btn-sm order_cancel" order_id="{{ order.id }}">取消订单</button>
+                                                                    {% elif order.status == 2 %}
+                                                                        <button class="btn btn-success btn-sm confirm-receipt" data-id="{{ order.id }}">确认收货</button>
+                                                                    {% elif order.status == 3 %}
+                                                                        <button class="btn btn-info btn-sm comment-order" data-id="{{ order.id }}">评价</button>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-5">
+                                        <h4>您还没有任何订单</h4>
+                                        <p>快去购物吧！</p>
+                                        <a href="/" class="btn btn-primary">
+                                            <i class="fas fa-shopping-bag"></i> 去购物
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function () {
+            // 编辑商品
+            $('.edit-product').click(function() {
+                var productId = $(this).data('id');
+                window.location.href = '/product/edit/' + productId;
+            });
+
+            // 删除商品
+            $('.delete-product').click(function() {
+                var productId = $(this).data('id');
+                if (confirm('确定要删除这个商品吗？')) {
+                    $.ajax({
+                        url: '/product/delete/' + productId,
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.code === 200) {
+                                alert('删除成功！');
+                                location.reload();
+                            } else {
+                                alert(response.message || '删除失败，请重试！');
+                            }
+                        },
+                        error: function() {
+                            alert('操作失败，请重试！');
+                        }
+                    });
+                }
+            });
+
+            // 下架商品
+            $('.xj_product').click(function() {
+                var productId = $(this).data('id');
+                if (confirm('确定要下架这个商品吗？')) {
+                    $.ajax({
+                        url: '/product/xj/' + productId,
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.code === 200) {
+                                alert('下架成功！');
+                                location.reload();
+                            } else {
+                                alert(response.message || '下架失败，请重试！');
+                            }
+                        },
+                        error: function() {
+                            alert('操作失败，请重试！');
+                        }
+                    });
+                }
+            });
+
+            // 重新申请审核
+            $('.repeat-check').click(function() {
+                var productId = $(this).data('id');
+                if (confirm('确定要重新申请审核这个商品吗？')) {
+                    $.ajax({
+                        url: '/product/repeat_check/' + productId,
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.code === 200) {
+                                alert('申请已提交！');
+                                location.reload();
+                            } else {
+                                alert(response.message || '申请失败，请重试！');
+                            }
+                        },
+                        error: function() {
+                            alert('操作失败，请重试！');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %} 

@@ -1,0 +1,84 @@
+{% extends 'user/base.html' %}
+
+{% block title %}
+    购物车
+{% endblock %}
+
+{% block head %}
+    <link href="{{ url_for('static',filename='css/cart.css') }}" rel="stylesheet" type="text/css"/>
+    <script src="{{ url_for('static',filename='js/carts.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="cartMain">
+        <div class="cartMain_hd">
+            <ul class="order_lists cartTop">
+                <li class="list_chk">
+                    <input type="checkbox" id="all" class="whole_check">
+                    <label for="all"></label>
+                    全选
+                </li>
+                <li class="list_con">商品信息</li>
+                <li class="list_info">商品参数</li>
+                <li class="list_price">单价</li>
+                <li class="list_amount">数量</li>
+                <li class="list_sum">金额</li>
+                <li class="list_op">操作</li>
+            </ul>
+        </div>
+
+        <div class="cartBox">
+            <div class="shop_info">
+                <div class="all_check">
+                    <input type="checkbox" id="shop_a" class="shopChoice">
+                    <label for="shop_a" class="shop"></label>
+                </div>
+                <div class="shop_name">
+                    店铺：<a href="">创意手工艺品交易平台</a>
+                </div>
+            </div>
+            <div class="order_content">
+                {% for cart in user.shopcarts %}
+                    <ul class="order_lists">
+                        <li class="list_chk">
+                            <input type="checkbox" id="{{ cart.id }}" class="son_check">
+                            <label for="{{ cart.id }}"></label>
+                        </li>
+                        <li class="list_con">
+                            <div class="list_img"><a href="{{ url_for('product.detail',id=cart.product.id) }}"><img src="{{ cart.product.head_img }}" alt=""></a></div>
+                            <div class="list_text"><a href="{{ url_for('product.detail',id=cart.product.id) }}">{{ cart.product.pname }}</a></div>
+                        </li>
+                        <li class="list_info">
+                            <p>规格：默认</p>
+                            <p>尺寸：默认</p>
+                        </li>
+                        <li class="list_price">
+                            <p class="price">￥{{ cart.product.new_price }}</p>
+                        </li>
+                        <li class="list_amount">
+                            <div class="amount_box">
+                                <a href="javascript:;" class="reduce">-</a>
+                                <input type="text" value="{{ cart.count }}" class="sum">
+                                <a href="javascript:;" class="plus">+</a>
+                            </div>
+                        </li>
+                        <li class="list_sum">
+                            <p class="sum_price">￥{{ cart.subTotal }}</p>
+                        </li>
+                        <li class="list_op">
+                            <p class="del"><a href="javascript:;" class="delBtn" sp_id="{{ cart.id }}">移除商品</a></p>
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bar-wrapper">
+            <div class="bar-right">
+                <div class="piece">已选商品<strong class="piece_num">0</strong>件</div>
+                <div class="totalMoney">共计: <strong class="total_text">￥0.00</strong></div>
+                <div class="calBtn"><a href="javascript:;">结算</a></div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

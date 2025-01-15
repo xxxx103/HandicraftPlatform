@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}购物车{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>我的购物车</h2>
+    {% if cart_items %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>商品</th>
+                    <th>单价</th>
+                    <th>数量</th>
+                    <th>小计</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" style="width: 100px; height: 100px; object-fit: cover;">
+                            <div class="ml-3">
+                                <h5>{{ item.product.name }}</h5>
+                            </div>
+                        </div>
+                    </td>
+                    <td>¥{{ item.product.price }}</td>
+                    <td>
+                        <div class="input-group" style="width: 120px;">
+                            <button class="btn btn-outline-secondary decrease-btn" type="button" data-id="{{ item.product_id }}">-</button>
+                            <input type="number" class="form-control text-center item-count" value="{{ item.count }}" min="1" max="{{ item.product.stock }}" data-id="{{ item.product_id }}">
+                            <button class="btn btn-outline-secondary increase-btn" type="button" data-id="{{ item.product_id }}">+</button>
+                        </div>
+                    </td>
+                    <td>¥{{ item.subtotal }}</td>
+                    <td>
+                        <button class="btn btn-danger remove-item" data-id="{{ item.product_id }}">删除</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-end align-items-center mt-4">
+        <h4 class="mr-4">总计: ¥{{ total_price }}</h4>
+        <button class="btn btn-primary btn-lg checkout-btn">结算</button>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h3>购物车是空的</h3>
+        <p>快去添加商品吧！</p>
+        <a href="/" class="btn btn-primary">继续购物</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function() {
+    // 增加数量
+    $(".increase-btn").click(function() {
+        var input = $(this).siblings("input");
+        var count = parseInt(input.val());
+        var max = parseInt(input.attr("max"));
+        if(count < max) {
+            input.val(count + 1).trigger("change");
+        }
+    });
+
+    // 减少数量
+    $(".decrease-btn").click(function() {
+        var input = $(this).siblings("input");
+        var count = parseInt(input.val());
+        if(count > 1) {
+            input.val(count - 1).trigger("change");
+        }
+    });
+
+    // 数量变化
+    $(".item-count").change(function() {
+        var pid = $(this).data("id");
+        var count = $(this).val();
+        updateCartItem(pid, count);
+    });
+
+    // 删除商品
+    $(".remove-item").click(function() {
+        var pid = $(this).data("id");
+        if(confirm("确定要删除这个商品吗？")) {
+            removeCartItem(pid);
+        }
+    });
+
+    // 更新购物车
+    function updateCartItem(pid, count) {
+        $.ajax({
+            url: "/product/updateCart",
+            type: "POST",
+            data: {
+                "pid": pid,
+                "count": count
+            },
+            success: function(result) {
+                if(result.status == "200") {
+                    location.reload();
+                } else {
+                    zlalert.alertError(result.msg);
+                }
+            }
+        });
+    }
+
+    // 删除购物车商品
+    function removeCartItem(pid) {
+        $.ajax({
+            url: "/product/removeCart",
+            type: "POST",
+            data: {
+                "pid": pid
+            },
+            success: function(result) {
+                if(result.status == "200") {
+                    location.reload();
+                } else {
+                    zlalert.alertError(result.msg);
+                }
+            }
+        });
+    }
+
+    // 结算
+    $(".checkout-btn").click(function() {
+        window.location.href = "/order/checkout";
+    });
+});
+</script>
+{% endblock %} 
